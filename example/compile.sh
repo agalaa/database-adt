@@ -1,0 +1,1 @@
+gcc ../src/databaseADT.c main.c ../queue/queueADT.c ../sqlite/sqlite3.c -lpthread -ldl
