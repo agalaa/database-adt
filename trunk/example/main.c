@@ -31,6 +31,7 @@ int main(void)
 {
     pid_t pid;
     databaseADT db = NULL;
+    int ret;
     char *path = "./database.db";
     char *schema = "./schema.sql";
     FILE *errLog = NULL;
@@ -47,14 +48,12 @@ int main(void)
         return 1;
     }
 
-    if ( (DBBuildDatabase(db, schema)) != DB_SUCCESS)
+    ret = DBBuildDatabase(db, schema);
+    if ( ret != DB_SUCCESS && ret != DB_ALREADY_EXISTS)
     {
         fprintf(stderr, "DBBuildDatabase failed\n");
         return 1;
     }
-
-    fclose(errLog);
-    FreeDatabaseADT(db);
 
     switch(pid = fork())
     {
@@ -71,6 +70,8 @@ int main(void)
             break;
     }
 
+    fclose(errLog);
+    FreeDatabaseADT(db);
     return 1;
 }
 

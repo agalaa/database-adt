@@ -9,6 +9,9 @@
 #include <stdarg.h>
 #include <limits.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include "../sqlite/sqlite3.h"
 #include "../include/databaseADT.h"
 
@@ -113,12 +116,26 @@ static int QueryExecute( databaseADT db, sqlite3_stmt **statement,
                         const char* sql, int bindingCount,
                         blobBindings* bindings, int args, ... );
 
+static long DBSize(databaseADT db);
+
+static long
+DBSize(databaseADT db)
+{
+    long size;
+    struct stat st;
+
+    stat(db->dbFile, &st);
+    size = st.st_size;
+
+    return size;
+}
 
 DB_ERR DBBuildDatabase( databaseADT db, const char *schema )
 {
     char sqlStr[1024] = {0};
     char line[LINE_MAX];
     FILE *fp = NULL;
+    FILE *dbFile = NULL;
     int ret;
 
     if ( db == NULL || schema == NULL)
@@ -127,7 +144,8 @@ DB_ERR DBBuildDatabase( databaseADT db, const char *schema )
     if ( (fp = fopen(schema, "r")) == NULL)
         return DB_INVALID_ARG;
 
-    /*TODO: Check if db already exists before creating*/
+    if (DBSize(db) > 0)
+        return DB_ALREADY_EXISTS;
 
     /*Read the schema*/
     while (fgets(line, LINE_MAX, fp) != NULL)
