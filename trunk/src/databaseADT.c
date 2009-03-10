@@ -135,17 +135,16 @@ DB_ERR DBBuildDatabase( databaseADT db, const char *schema )
     char sqlStr[1024] = {0};
     char line[LINE_MAX];
     FILE *fp = NULL;
-    FILE *dbFile = NULL;
     int ret;
 
     if ( db == NULL || schema == NULL)
             return DB_INVALID_ARG;
 
-    if ( (fp = fopen(schema, "r")) == NULL)
-        return DB_INVALID_ARG;
-
     if (DBSize(db) > 0)
         return DB_ALREADY_EXISTS;
+
+    if ( (fp = fopen(schema, "r")) == NULL)
+        return DB_INVALID_ARG;
 
     /*Read the schema*/
     while (fgets(line, LINE_MAX, fp) != NULL)
